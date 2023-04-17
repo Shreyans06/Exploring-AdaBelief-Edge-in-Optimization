@@ -44,8 +44,8 @@ class AdaBelief(Optimizer):
                                           torch.mul(1.0 - beta_2, torch.square(torch.sub(grad, m_t)))), group['eps'])
 
                 if group['correct_bias']:
-                    m_t = m_t.divide(1.0 - beta_1 ** state['step'])
-                    s_t = s_t.divide(1.0 - beta_2 ** state['step'])
+                    m_t_hat = m_t.divide(1.0 - beta_1 ** state['step'])
+                    s_t_hat = s_t.divide(1.0 - beta_2 ** state['step'])
 
-                denom = torch.add(torch.sqrt(s_t), group['eps'])
-                param.data.addcdiv_(m_t, denom, value=-group['lr'])
+                denom = torch.add(torch.sqrt(s_t_hat), group['eps'])
+                param.data.addcdiv_(m_t_hat, denom, value=-group['lr'])
