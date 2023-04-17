@@ -45,10 +45,10 @@ class SGD_momentum(Optimizer):
         dx = self.cost_f.df_dx(self.x, self.y)
         dy = self.cost_f.df_dy(self.x, self.y)
 
-        self.vx = beta * self.vx + lr * dx
-        self.vy = beta * self.vy + lr * dy
-        self.x += - self.vx
-        self.y += - self.vy
+        self.vx = beta * self.vx + (1-beta) * dx
+        self.vy = beta * self.vy + (1-beta) * dy
+        self.x += - lr * self.vx
+        self.y += - lr * self.vy
 
         return [self.x, self.y]
 
@@ -86,7 +86,7 @@ class Adam(Optimizer):
 class AdaBelief(Optimizer):
     def __init__(self, cost_f, lr=0.001, beta_1=0.9, beta_2=0.999, x=None, y=None):
         super().__init__(cost_f, lr, x, y, beta_1=beta_1, beta_2=beta_2)
-        self.m_x, self.m_y, self.s_x, self.s_y, self.t = 0.0, 0.0, 0.0, 0.0, 0.0
+        self.m_x, self.m_y, self.s_x, self.s_y, self.t = 0.0, 0.0, 0.0, 0.0, 0
 
     def step(self, lr=None):
         self.t += 1
