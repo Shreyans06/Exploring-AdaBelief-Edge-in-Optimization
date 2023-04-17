@@ -4,9 +4,9 @@ import autograd.numpy as np
 
 class Beale:
     def __init__(self):
-        self.x_min, self.x_max = -1.5, 5.0
-        self.y_min, self.y_max = -3.0, 1.5
-        self.x_start, self.y_start = 2.4, -2.8
+        self.x_min, self.x_max = -4.0, 4.0
+        self.y_min, self.y_max = -4.0, 4.0
+        self.x_start, self.y_start = -2.5, -2.5
         self.x_global_min, self.y_global_min, self.z_global_min = 3.0, 0.5, 0.0
         self._calculate_derivatives()
 
@@ -19,7 +19,7 @@ class Beale:
         return z
 
 
-class modulus:
+class Modulus:
     def __init__(self):
         self.x_min, self.x_max = -3.0, 3.0
         self.y_min, self.y_max = -3.0, 3.0
@@ -32,10 +32,12 @@ class modulus:
         self.df_dy = grad(self.eval, 1)
 
     def eval(self, x, y):
-        z = np.abs(x) + np.abs(y)
+        f = [np.abs(x), np.abs(y)]
+        z = np.sum(f)
         return z
 
-class modulus1:
+
+class L1Loss:
     def __init__(self):
         self.x_min, self.x_max = -3.0, 3.0
         self.y_min, self.y_max = -3.0, 3.0
@@ -48,6 +50,40 @@ class modulus1:
         self.df_dy = grad(self.eval, 1)
 
     def eval(self, x, y):
-        list1 = [np.abs(x + y), np.abs(x - y)/10]
-        z = np.sum(list1)
+        f = [np.abs(x + y), np.abs(x - y) / 10]
+        z = np.sum(f)
+        return z
+
+class L2Loss:
+    def __init__(self):
+        self.x_min, self.x_max = -3.0, 3.0
+        self.y_min, self.y_max = -3.0, 3.0
+        self.x_start, self.y_start = 2.5, 0.0
+        self.x_global_min, self.y_global_min, self.z_global_min = 0.0, 0.0, 0.0
+        self._calculate_derivatives()
+
+    def _calculate_derivatives(self):
+        self.df_dx = grad(self.eval, 0)
+        self.df_dy = grad(self.eval, 1)
+
+    def eval(self, x, y):
+        f = [(x + y) ** 2, (x - y) ** 2 / 10]
+        z = np.sum(f)
+        return z
+
+class ModulusBeta:
+    def __init__(self):
+        self.x_min, self.x_max = -3.0, 3.0
+        self.y_min, self.y_max = -3.0, 3.0
+        self.x_start, self.y_start = 0.5, -1.5
+        self.x_global_min, self.y_global_min, self.z_global_min = 0.0, 0.0, 0.0
+        self._calculate_derivatives()
+
+    def _calculate_derivatives(self):
+        self.df_dx = grad(self.eval, 0)
+        self.df_dy = grad(self.eval, 1)
+
+    def eval(self, x, y):
+        f = [np.abs(x) / 10, np.abs(y)]
+        z = np.sum(f)
         return z

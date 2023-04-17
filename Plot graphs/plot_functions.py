@@ -66,5 +66,5 @@ def plot_path(path_dict, optim_fn, figsize=[10, 10], frames=7, file_name=''):
         color_patch.append(mlines.Line2D([], [], color=c, label=algo))
     ax.legend(handles=color_patch)
 
-    animation = FuncAnimation(fig, update, interval=1, frames=frames)
+    animation = FuncAnimation(fig, update, interval=0.5, frames=frames)
     animation.save(f"./{file_name}.gif", dpi=80, writer="imagemagick",fps=24)
