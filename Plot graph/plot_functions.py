@@ -1,3 +1,4 @@
+import matplotlib
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import numpy as np
@@ -37,8 +38,29 @@ def plot_contours(optim_fn, steps=0.01):
 
     fig, ax = plt.subplots()
 
-    ax.contourf(X, Y, Z, cmap="Blues_r", levels=np.linspace(z_array.min(), z_array.max(), 20))
-    ax.text(optim_fn.x_global_min, optim_fn.y_global_min, "X",horizontalalignment='center',verticalalignment='center',color="orange", size=15)
+    min_val, max_val = 0.2, 0.6
+    n = 20
+    orig_cmap = plt.cm.Purples
+    colors = orig_cmap(np.linspace(min_val, max_val, n))
+    #
+    # orig_cmap = plt.cm.aqua
+    # colors1 = plt.aqua(np.linspace(min_val, max_val, 10))
+    # print(colors1)
+    # print(colors)
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list("mycmap", colors = colors)
+
+    # gradient = np.linspace(0, 1, 256)
+    # gradient = np.vstack((gradient, gradient))
+    #
+    # fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(5, 2))
+    # ax1.imshow(gradient, cmap=orig_cmap, aspect='auto')
+    # ax1.set_title('original')
+    # ax2.imshow(gradient, cmap=cmap, aspect='auto')
+    # ax2.set_title('custom')
+    # plt.tight_layout()
+
+    ax.contourf(X, Y, Z, cmap=cmap, levels=np.linspace(z_array.min(), z_array.max(), 20))
+    ax.text(optim_fn.x_global_min, optim_fn.y_global_min, "X",horizontalalignment='center',verticalalignment='center',color="black", size=15)
 
     return fig, ax
 
@@ -71,10 +93,10 @@ def plot_path(path_dict, optim_fn, frames=7, file_name=''):
         color_patch.append(mlines.Line2D([], [], color=c, label=algo))
     ax.legend(handles=color_patch)
 
-    animation = FuncAnimation(fig, animate, interval=1, blit=True, repeat=True, frames=frames)
+    animation = FuncAnimation(fig, animate, interval=0.5, blit=True, repeat=True, frames=frames)
     plt.title(f"Loss function : {file_name}")
-    animation.save(f"./Convergence/{file_name}.gif", dpi=300, writer=PillowWriter(fps=100))
-    fig.savefig(f"./Trajectories/{file_name}.png")
+    animation.save(f"./Convergence/{file_name}.gif", dpi = 400, writer=PillowWriter(fps=100))
+    fig.savefig(f"./Trajectories/{file_name}.png", dpi = 400)
     plt.close(fig)
 
 

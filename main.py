@@ -130,7 +130,7 @@ def main(dataset, model_architecture, init_optimizer):
     train_loss_trends = []
     test_loss_trends = []
 
-    for epoch in range(start, end):
+    for epoch in range(start, end+1):
 
         train_acc, train_loss = train(net, epoch, train_loader, optimizer, criterion)
         test_acc, test_loss = test(net, test_loader, criterion)
