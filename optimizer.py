@@ -3,7 +3,8 @@ from torch.optim import Optimizer
 
 
 class AdaBelief(Optimizer):
-    def __init__(self, params, lr=0.001, betas=(0.9, 0.999), eps=1e-8, weight_decay=0, correct_bias=True):
+    def __init__(self, params, lr=0.001, betas=(0.9, 0.999), eps=1e-8, weight_decay=5e-4,
+                 weight_decouple=True, fixed_decay=False, correct_bias=True):
 
         if lr < 0:
             raise ValueError("Invalid learning rate")
@@ -13,9 +14,20 @@ class AdaBelief(Optimizer):
             raise ValueError("Invalid beta 1")
         if not 0 <= eps:
             raise ValueError("Invalid epsilon")
-        defaults = dict(lr=lr, betas=betas, eps=eps, weight_decay=weight_decay, correct_bias=correct_bias)
+        defaults = dict(lr=lr, betas=betas, eps=eps, weight_decay=weight_decay,
+                       correct_bias=correct_bias)
 
         super(AdaBelief, self).__init__(params, defaults)
+        self.weight_decouple = weight_decouple
+        self.fixed_decay = fixed_decay
+    
+    def reset(self):
+        for group in self.param_groups:
+            for param in group['params']:
+                state = self.state[param]
+                state['step']=0
+                state['exp_avg'] = torch.zeros_like(param.data,memory_format=torch.preserve_format)
+                state['exp_avg_sq'] = torch.zeros_like(param.data,memory_format=torch.preserve_format)
 
     def step(self, closure=None):
         for group in self.param_groups:
@@ -34,6 +46,17 @@ class AdaBelief(Optimizer):
                     state['exp_avg'] = torch.zeros_like(param.data)
                     state['exp_avg_sq'] = torch.zeros_like(param.data)
 
+#                 Weight Decay    
+                if self.weight_decouple:
+                    if not self.fixed_decay:
+                        param.data.mul_(1.0 - group['lr'] * group['weight_decay'])
+                    else:
+                        param.data.mul_(1.0 - group['weight_decay'])
+                else:
+                    if group['weight_decay'] != 0:
+                        grad.add_(param.data, alpha=group['weight_decay'])
+                
+                
                 exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']
                 beta_1, beta_2 = group['betas']
                 state['step'] += 1

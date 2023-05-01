@@ -2,20 +2,26 @@ import torch
 import torch.nn as nn
 import operator
 import functools
-
+import math
 
 class VGG(nn.Module):
     '''
     VGG model
     '''
 
-    def __init__(self, architecture, num_classes=10, input_dims=[3, 32, 32]):
+    def __init__(self, architecture, num_classes=100, input_dims=[3, 32, 32]):
         super(VGG, self).__init__()
         self.architecture = architecture
         self.num_classes = num_classes
         self.input_dims = input_dims
         self.convs = self.conv()
         self.fcs = self.fc()
+        
+#         for m in self.modules():
+#             if isinstance(m, nn.Conv2d):
+#                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+#                 m.weight.data.normal_(0, math.sqrt(2. / n))
+#                 m.bias.data.zero_()
 
     def conv(self):
         layers = []
@@ -24,7 +30,7 @@ class VGG(nn.Module):
         for value in self.architecture:
             if type(value) == int:
                 layers += [nn.Conv2d(in_channels=input_channels, out_channels=value, kernel_size=3, padding=1),
-                           nn.BatchNorm2d(value), nn.ReLU(inplace=True)]
+                           nn.BatchNorm2d(value),nn.ReLU(inplace=True)]
                 input_channels = value
             else:
                 layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
@@ -35,12 +41,13 @@ class VGG(nn.Module):
 
         features_size = functools.reduce(operator.mul, list(self.convs(torch.rand(1, *self.input_dims)).shape))
 
-        return nn.Sequential(nn.Linear(features_size, 512),
+        return nn.Sequential(nn.Dropout(p=0.5),
+                            nn.Linear(features_size, 512),
                              nn.ReLU(inplace=True),
                              nn.Dropout(p=0.5),
                              nn.Linear(512, 512),
                              nn.ReLU(inplace=True),
-                             nn.Dropout(p=0.5),
+                             
                              nn.Linear(512, self.num_classes)
                              )
 
@@ -50,7 +57,7 @@ class VGG(nn.Module):
         x = self.fcs(x)
         return x
 
-
+    
 # Used inside ResNet
 class BasicBlock(nn.Module):
     expansion = 1
@@ -86,7 +93,7 @@ class BasicBlock(nn.Module):
         return out
 
 class ResNet(nn.Module):
-    def __init__(self, block, layers, num_classes=10):
+    def __init__(self, block, layers, num_classes=100):
         super().__init__()
         
         self.inplanes = 64

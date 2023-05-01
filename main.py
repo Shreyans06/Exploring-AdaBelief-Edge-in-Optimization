@@ -1,8 +1,8 @@
 import os
 import pickle
 from torch import optim, nn
-from optimizer import AdaBelief
-from models import VGG
+# from optimizer import AdaBelief
+# from models import VGG
 import torch
 import torchvision.transforms as transforms
 import torchvision
@@ -10,14 +10,33 @@ from torch.utils.data import DataLoader
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
+def adjust_learning_rate(optimizer,gamma=0.1,reset=True):
+    for param_group in optimizer.param_groups:
+        param_group['lr'] *= gamma
+    if optimizer.__class__.__name__ == 'AdaBelief' and reset:
+        optimizer.reset()
+    elif optimizer.__class__.__name__ == 'Adam' and reset:
+        for group in optimizer.param_groups:
+            for param in group['params']:
+                state = optimizer.state[param]
+                state['step']=torch.zeros((1,),dtype=torch.float, device=param.device)
+                state['exp_avgs'] = torch.zeros_like(param.data,memory_format=torch.preserve_format)
+                state['exp_avg_sq'] = torch.zeros_like(param.data,memory_format=torch.preserve_format)
+    elif optimizer.__class__.__name__ == 'SGD' and reset:
+        for group in optimizer.param_groups:
+            for param in group['params']:
+                state = optimizer.state[param]
+                state['step']=0
+                state['momentum_buffer'] = torch.zeros_like(param.data,memory_format=torch.preserve_format)
+                
+        
 def initialize_optimizer(inp_model, optimizer='SGD'):
     if optimizer == 'Adam':
-        return optim.Adam(inp_model.parameters(), lr=0.001)
+        return optim.Adam(inp_model.parameters(), lr=0.001,weight_decay=5e-4)
     elif optimizer == 'SGD':
-        return optim.SGD(inp_model.parameters(), lr=0.001, momentum=0.9)
+        return optim.SGD(inp_model.parameters(), lr=0.001, momentum=0.9,weight_decay=5e-4)
     elif optimizer == 'AdaBelief':
-        return AdaBelief(inp_model.parameters())
+        return AdaBelief(inp_model.parameters(), lr=0.0001)
 
 
 def build_model(model_type):
@@ -25,7 +44,9 @@ def build_model(model_type):
     if model_type == "VGG":
         VGG11 = [64, "MP", 128, "MP", 256, 256, "MP", 512, 512, "MP", 512, 512, "MP"]
         network = VGG(VGG11).to(device)
-
+    elif model_type == 'ResNet':
+        layers = [3,4,6,4]
+        network = ResNet(BasicBlock, layers).to(device)
     if device == 'cuda':
         network = torch.nn.DataParallel(network)
 
@@ -49,10 +70,10 @@ def get_data(batch_size=128):
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
 
-    cifar_train_data = torchvision.datasets.CIFAR10(root='./data/', train=True,
+    cifar_train_data = torchvision.datasets.CIFAR100(root='./data/', train=True,
                                                     download=True, transform=transform_train)
 
-    cifar_test_data = torchvision.datasets.CIFAR10(root='./data/', train=False,
+    cifar_test_data = torchvision.datasets.CIFAR100(root='./data/', train=False,
                                                    download=True, transform=transform_test)
 
     cifar_train_loader = DataLoader(cifar_train_data, batch_size=batch_size, shuffle=True)
@@ -132,6 +153,8 @@ def main(dataset, model_architecture, init_optimizer):
 
     for epoch in range(start, end+1):
 
+        if epoch==150:
+            adjust_learning_rate(optimizer,reset=False)
         train_acc, train_loss = train(net, epoch, train_loader, optimizer, criterion)
         test_acc, test_loss = test(net, test_loader, criterion)
 
@@ -155,4 +178,4 @@ def main(dataset, model_architecture, init_optimizer):
         os.path.join(os.getcwd() + "/Plot_curves",  f"{dataset}_{model_architecture}_{init_optimizer}.p"),"wb"))
 
 
-main("CIFAR-10", "VGG", "Adam")
+
