@@ -16,7 +16,7 @@ def plot_optimization_function(optim_fn, steps=0.01, figsize=[10, 10], name=''):
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(projection='3d')
 
-    ax.plot_surface(X, Y, Z, cmap=plt.cm.coolwarm, antialiased=False, shade=False, rstride=5, cstride=1)
+    ax.plot_surface(X, Y, Z, cmap=plt.cm.coolwarm, antialiased=False, shade=False, rstride=5, cstride=1,alpha = 0.5)
     ax.patch.set_facecolor('white')
     ax.view_init(elev=30, azim=60)
 
@@ -67,7 +67,6 @@ def plot_contours(optim_fn, steps=0.01):
 
 def plot_path(path_dict, optim_fn, frames=7, file_name=''):
     fig, ax1 = plot_contours(optim_fn)
-
     ax = ax1.twinx()
     y_m = ax1.get_ylim()
 
@@ -88,10 +87,10 @@ def plot_path(path_dict, optim_fn, frames=7, file_name=''):
 
         return plots
 
-    color_patch = []
-    for algo, (x, y, c) in path_dict.items():
-        color_patch.append(mlines.Line2D([], [], color=c, label=algo))
-    ax.legend(handles=color_patch)
+    # color_patch = []
+    # for algo, (x, y, c) in path_dict.items():
+    #     color_patch.append(mlines.Line2D([], [], color=c, label=algo))
+    # ax.legend(handles=color_patch)
 
     animation = FuncAnimation(fig, animate, interval=0.5, blit=True, repeat=True, frames=frames)
     plt.title(f"Loss function : {file_name}")

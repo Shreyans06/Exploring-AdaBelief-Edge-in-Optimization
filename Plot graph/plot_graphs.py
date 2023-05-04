@@ -5,7 +5,7 @@ import pickle
 import os
 import matplotlib.pyplot as plt
 
-learning_rate = 0.0005
+learning_rate = 0.001
 
 # to plot contour plots and compare convergence rate of the algorithms
 def contour_comparison(cost_fn,beta_1=0.9, beta_2=0.999,iterations = 2000):
@@ -30,20 +30,21 @@ def contour_comparison(cost_fn,beta_1=0.9, beta_2=0.999,iterations = 2000):
     plot_path(path_dict, cost_fn, frames=iterations, file_name=cost_fn.__class__.__name__)
 
 
-# cost_f = Beale()
-# contour_comparison(cost_f)
+
+cost_f = Beale()
+contour_comparison(cost_f)
 
 cost_f = Modulus()
-contour_comparison(cost_f,iterations=500)
+contour_comparison(cost_f,iterations=1000)
 
-# cost_f = L1Loss()
-# contour_comparison(cost_f,iterations=2500)
-#
-# cost_f = L2Loss()
-# contour_comparison(cost_f)
-#
-# cost_f = ModulusBeta()
-# contour_comparison(cost_f,beta_1=0.3,beta_2=0.3,iterations=100)
+cost_f = L1Loss()
+contour_comparison(cost_f,iterations=2000)
+
+cost_f = L2Loss()
+contour_comparison(cost_f,iterations= 1800)
+
+cost_f = ModulusBeta()
+contour_comparison(cost_f,beta_1=0.3,beta_2=0.3,iterations=100)
 
 
 # to plot model performance like Train accuracy vs Training epoch
@@ -59,7 +60,7 @@ def model_performance(dataset='CIFAR-10', architecture = 'VGG', metric='test_acc
         if names.split("_")[0] == dataset and names.split("_")[1] == architecture:
             files[names.split(".")[0]] = pickle.load(open('./Plot_curves/' + names, "rb"))
             style ='--'
-            if names.split(".")[0].split("_")[-1] == 'AdaBelief':
+            if names.split(".")[0].split("_")[-1].__contains__( 'AdaBelief'):
                 style= '-'
             plt.plot([j for j in range(len(files[names.split(".")[0]][metric]))], files[names.split(".")[0]][metric],
                          linewidth=2, label=names.split(".")[0].split("_")[-1], linestyle=style)
@@ -67,16 +68,22 @@ def model_performance(dataset='CIFAR-10', architecture = 'VGG', metric='test_acc
     plt.grid()
     y_lim =(82,98)
     if metric == 'test_acc' and  dataset=='CIFAR-10' and architecture == 'VGG' :
-        y_lim = (84,92)
+        y_lim = (75,95)
     elif metric == 'test_acc' and  dataset=='CIFAR-10' and architecture == 'ResNet' :
-        y_lim = (88,96)
+        y_lim = (80,96)
+    elif metric == 'test_acc' and  dataset=='CIFAR-100' and architecture == 'VGG' :
+        y_lim = (45,70)
+    elif metric == 'test_acc' and dataset == 'CIFAR-100' and architecture == 'ResNet':
+        y_lim = (50, 75)
+    else:
+        y_lim = (80, 101)
     plt.ylim(y_lim)
     plt.legend(fontsize=14)
     plt.legend(loc="upper left")
     plt.xlabel('Training Epoch')
     plt.ylabel(f'{type}')
     plt.title(f'{architecture} on {dataset} - {type} ~ Training epoch')
-    plt.savefig(f'./Plot_curves/{architecture} on {dataset} - {type} ~ Training epoch', dpi=400)
+    plt.savefig(f'./Plot_curves/{architecture} on {dataset} - {type} ~ Training epoch', dpi=600)
     plt.show()
 
-# model_performance(architecture='ResNet')
+# model_performance(dataset='CIFAR-100',architecture='ResNet',metric='train_acc')

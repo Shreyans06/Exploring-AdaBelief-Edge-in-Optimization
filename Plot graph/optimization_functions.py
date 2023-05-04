@@ -35,7 +35,7 @@ class L1Loss:
     def __init__(self):
         self.x_min, self.x_max = -3.0, 3.0
         self.y_min, self.y_max = -3.0, 3.0
-        self.x_start, self.y_start = 2.5, 0.2
+        self.x_start, self.y_start = -2.0 , 0.0
         self.x_global_min, self.y_global_min, self.z_global_min = 0.0, 0.0, 0.0
         self.df_dx = grad(self.eval, 0)
         self.df_dy = grad(self.eval, 1)
@@ -48,7 +48,7 @@ class L2Loss:
     def __init__(self):
         self.x_min, self.x_max = -3.0, 3.0
         self.y_min, self.y_max = -3.0, 3.0
-        self.x_start, self.y_start = 2.5, 0.2
+        self.x_start, self.y_start = 2.5, 0.0
         self.x_global_min, self.y_global_min, self.z_global_min = 0.0, 0.0, 0.0
         self.df_dx = grad(self.eval, 0)
         self.df_dy = grad(self.eval, 1)
@@ -61,11 +61,11 @@ class ModulusBeta:
     def __init__(self):
         self.x_min, self.x_max = -3.0, 3.0
         self.y_min, self.y_max = -3.0, 3.0
-        self.x_start, self.y_start = 0.5, -1.5
+        self.x_start, self.y_start = 0.5, 1.5
         self.x_global_min, self.y_global_min, self.z_global_min = 0.0, 0.0, 0.0
         self.df_dx = grad(self.eval, 0)
         self.df_dy = grad(self.eval, 1)
 
     def eval(self, x, y):
-        z = ( np.abs(x) / 10 ) + np.abs(y)
+        z = (np.abs(x)/10) + np.abs(y)
         return z
