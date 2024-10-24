@@ -1,4 +1,4 @@
-### Experimenting with AdaBelief Optimizer
+### Tune It Right: Exploring AdaBelief's Edge in Optimization
 This repository focuses on experimenting with the AdaBelief optimizer, an advanced optimization algorithm that adapts the learning rate based on the belief in the gradient. AdaBelief combines the strengths of Adam and RMSProp while improving generalization performance
 
 ### Features
